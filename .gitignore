@@ -1,6 +1,10 @@
 # Actual configuration file
 conf.json
 
+# Saved history
+history.json
+history.json.bkp
+
 # Logs
 logs
 *.log

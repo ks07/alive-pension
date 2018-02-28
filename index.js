@@ -2,6 +2,8 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 const Table = require('cli-table2');
 
+const store = require('./store.js');
+
 // Ensure that unhandled rejections aren't just ignored
 process.on('unhandledRejection', up => { console.log(up.stack || up); });
 
@@ -11,6 +13,8 @@ function parseDisplayNumber(dispNum) {
 
 async function main() {
     const config = JSON.parse(fs.readFileSync('./conf.json', 'utf8'));
+
+    let histP = store.load();
 
     const browser = await puppeteer.launch({
         headless: false,
@@ -110,7 +114,11 @@ async function main() {
 
     console.log(JSON.stringify(funds));
 
+    let hist = await histP;
+
     display(summary, funds);
+
+    await store.store(hist, summary, funds);
 
     await page.close();
     await browser.close();
