@@ -1,0 +1,15 @@
+{
+  "name": "alive-pension",
+  "version": "1.0.0",
+  "description": "Checks pension fund performance using a headless web browser",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "cli-table2": "^0.2.0",
+    "puppeteer": "^1.1.1"
+  }
+}

@@ -1,0 +1,10 @@
+{
+    "username": "USERNAME",
+    "password": "PASSWORD",
+    "myFunds": {
+        "FUND FULL NAME": {
+            "shortname": "MYNAME",
+            "share": 1.0
+        }
+    }
+}
