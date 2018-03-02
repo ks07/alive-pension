@@ -5,6 +5,9 @@ conf.json
 history.json
 history.json.bkp
 
+# browserify output
+*.bundle.js
+
 # Logs
 logs
 *.log
