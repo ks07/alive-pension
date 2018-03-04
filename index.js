@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const Table = require('cli-table2');
+const browserify = require('browserify');
 
 const store = require('./store.js');
 
@@ -120,6 +121,8 @@ async function main() {
 
     await store.store(hist, summary, funds);
 
+    updateVis();
+
     await page.close();
     await browser.close();
 }
@@ -146,6 +149,15 @@ function display(summary, funds) {
 
     console.log(sTable.toString());
     console.log(dTable.toString());
+}
+
+function updateVis() {
+    let b = browserify();
+    b.add('./vis/vis.js');
+
+    let bundleFile = fs.createWriteStream('./vis/vis.bundle.js');
+
+    b.bundle().pipe(bundleFile);
 }
 
 main();
