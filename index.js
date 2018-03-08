@@ -97,7 +97,7 @@ async function fetchFromSite(config) {
             } else if (/Unit\s+Price/i.test(detail.header)) {
                 fund.price = parseDisplayNumber(detail.value);
             } else if (/Fund\s+value/i.test(detail.header)) {
-                // This value is rounded to the nearest penny
+                // This value is rounded to the nearest penny, so may not accurately reflect units * price
                 fund.value = parseDisplayNumber(detail.value);
             } else {
                 console.warn(`Recovered an unrecognised value from the page: ${detail.header}`);
