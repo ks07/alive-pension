@@ -18,6 +18,8 @@ Before running this application, it will need to be configured. The application 
 {
     "username": "USERNAME", // Your login username, usually your email address
     "password": "PASSWORD", // Your password
+    "headless": false, // If set to true, Chromium will be launched in headless mode
+    "chromeArgs": [], // An array of additional argument strings to pass to the chromium executable
     "myFunds": { // Add as many objects to myFunds as you have investment funds
         "FUND FULL NAME": { // The official name of the investment fund - these are usually very long!
             "shortname": "MYNAME", // A shortname to use for this fund when printing and visualising data

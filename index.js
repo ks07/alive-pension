@@ -14,7 +14,8 @@ function parseDisplayNumber(dispNum) {
 
 async function fetchFromSite(config) {
     const browser = await puppeteer.launch({
-        headless: false,
+        headless: config.headless || false,
+        args: config.chromeArgs || [],
     });
 
     let page = await browser.newPage();

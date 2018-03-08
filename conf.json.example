@@ -1,6 +1,8 @@
 {
     "username": "USERNAME",
     "password": "PASSWORD",
+    "headless": false,
+    "chromeArgs": [],
     "myFunds": {
         "FUND FULL NAME": {
             "shortname": "MYNAME",
