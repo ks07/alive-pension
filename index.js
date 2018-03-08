@@ -12,11 +12,7 @@ function parseDisplayNumber(dispNum) {
     return parseFloat(dispNum.replace(/[£,]|\s/g, ""));
 }
 
-async function main() {
-    const config = JSON.parse(fs.readFileSync('./conf.json', 'utf8'));
-
-    let histP = store.load();
-
+async function fetchFromSite(config) {
     const browser = await puppeteer.launch({
         headless: false,
     });
@@ -82,6 +78,14 @@ async function main() {
 
     console.dir(rawFundBreakdown);
 
+    await page.close();
+    console.log('Closed page');
+    try {
+        await browser.close();
+    } catch (err) {
+        // Closing the page may close the browser, so ignore errors here.
+    }
+
     // Interpret the human readable names and restructure the fund breakdown.
     let funds = {};
     rawFundBreakdown.forEach(rawFund => {
@@ -102,29 +106,45 @@ async function main() {
 
         fund.fullname = fund.name;
 
-        let fundConfig = config.myFunds[fund.name];
-        if (fundConfig) {
-            fund.name = fundConfig.shortname || fund.name;
-            fund.share = fundConfig.share || 1 / rawFund.length;
-        }
+        let fundConfig = config.myFunds ? config.myFunds[fund.name] : {};
+        fund.name = fundConfig.shortname || fund.name;
+        fund.share = fundConfig.share || 1 / rawFund.length; // Unfortunately the interface doesn't show the split ratios anywhere!
 
         funds[fund.name] = fund;
     });
 
     console.dir(funds);
 
-    console.log(JSON.stringify(funds));
+    return {summary, funds};
+}
 
-    let hist = await histP;
+async function main() {
+    let config;
+    try {
+        config = JSON.parse(fs.readFileSync('./conf.json', 'utf8'));
+    } catch (err) {
+        console.error("Failed to load configuration file conf.json: %s", err.message);
+        process.exitCode = 1;
+        return;
+    }
 
-    display(summary, funds);
+    let histP = store.load();
 
-    await store.store(hist, summary, funds);
+    let liveData = await fetchFromSite(config);
+
+    display(liveData.summary, liveData.funds);
+
+    let hist;
+    try {
+        hist = await histP;
+    } catch (err) {
+        console.error("Failed to load/store historic data.", err);
+        process.exitCode = 1;
+    }
+
+    await store.store(hist, liveData.summary, liveData.funds);
 
     updateVis();
-
-    await page.close();
-    await browser.close();
 }
 
 function display(summary, funds) {

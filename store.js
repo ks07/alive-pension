@@ -20,7 +20,10 @@ exports.load = async function() {
         let data = await fsReadFileP(DATAFILE);
         return JSON.parse(data);
     } catch (err) {
-        console.error(err);
-        return [];
+        if (err.code == 'ENOENT') {
+            console.error("No historic data found, will start from scratch.");
+            return [];
+        }
+        throw err;
     }
 }
