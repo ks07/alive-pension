@@ -39,8 +39,22 @@ function unpackPcntTrend(hist) {
     });
 }
 
+function unpackPaidTrend(hist) {
+    return hist.map(d => {
+        return { x: d.timestamp, y: d.summary.paid };
+    });
+}
+
 datasets = getFunds(hist).map((name, i) => {
-    return { label: name, data: unpackFundTrend(hist, name), backgroundColor: colors[i], pointBorderColor: '#000000' };
+    return { label: name, data: unpackFundTrend(hist, name), backgroundColor: colors[i], pointBorderColor: '#000000', yAxisID: 'stackY' };
+});
+// Datasets get z-indexed by the order in which they appear, i.e. earlier datasets are drawn over later ones
+datasets.unshift({
+    label: 'Paid In',
+    data: unpackPaidTrend(hist),
+    yAxisID: 'overlayY',
+    fill: false,
+    borderColor: '#e53d3d',
 });
 
 let fundchart = new Chart(document.getElementById('fundchart'), {
@@ -58,17 +72,36 @@ let fundchart = new Chart(document.getElementById('fundchart'), {
                     labelString: 'Day',
                 }
             }],
-            yAxes: [{
-                display: true,
-                stacked: true,
-                scaleLabel: {
+            yAxes: [
+                {
+                    display: false,
+                    stacked: false,
+                    id: 'overlayY',
+                    ticks: {
+                        min: 1000.0,
+                    },
+                },
+                {
                     display: true,
-                    labelString: 'Fund Value',
-                }
-            }]
+                    stacked: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Fund Value',
+                    },
+                    id: 'stackY',
+                    ticks: {
+                        min: 0.0,
+                    },
+                },
+            ]
         }
     },
 });
+
+// Use the auto-calculated limits of the stacked axis as the limits of the overlayed one, so they share the same scale
+fundchart.options.scales.yAxes[0].ticks.min = fundchart.controller.scales.stackY.start;
+fundchart.options.scales.yAxes[0].ticks.max = fundchart.controller.scales.stackY.end;
+fundchart.update();
 
 let perfchart = new Chart(document.getElementById('perfchart'), {
     type: 'line',
