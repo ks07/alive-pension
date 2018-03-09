@@ -131,7 +131,13 @@ async function main() {
 
     let histP = store.load();
 
-    let liveData = await fetchFromSite(config);
+    try {
+        var liveData = await fetchFromSite(config);
+    } catch (err) {
+        console.error("Failed to fetch data from the pension site: %s", err.message);
+        process.exitCode = 1;
+        return;
+    }
 
     display(liveData.summary, liveData.funds);
 
