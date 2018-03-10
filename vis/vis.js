@@ -1,10 +1,12 @@
 const Chart = require('chart.js');
 const charthelper = require('./charthelper.js');
 
-var hist = require('../history.json');
+const hist = require('../history.json');
 
 // Colour palette courtesy of http://www.colorhunt.co/c/107141
-let colors = ['#4a772f', '#ffdd00', '#fa9e05', '#a7095c'];
+const colors = ['#4a772f', '#ffdd00', '#fa9e05', '#a7095c'];
+const color_purple = '#a620db';
+const color_red = '#e53d3d';
 
 // An alternative Array.map implementation allowing simultaneous filtering
 // If the callback function transform returns undefined, that element will be skipped
@@ -46,7 +48,7 @@ function unpackPaidTrend(hist) {
     });
 }
 
-datasets = getFunds(hist).map((name, i) => {
+let datasets = getFunds(hist).map((name, i) => {
     return charthelper.sensibleDataset(name, unpackFundTrend(hist, name), {
         backgroundColor: colors[i],
         pointBorderColor: '#000000',
@@ -57,7 +59,7 @@ datasets = getFunds(hist).map((name, i) => {
 datasets.unshift(charthelper.sensibleDataset('Paid In', unpackPaidTrend(hist), {
     yAxisID: 'overlayY',
     fill: false,
-    borderColor: '#e53d3d',
+    borderColor: color_red,
 }));
 
 let fundchart = new Chart(document.getElementById('fundchart'), {
@@ -106,10 +108,25 @@ fundchart.options.scales.yAxes[0].ticks.min = fundchart.controller.scales.stackY
 fundchart.options.scales.yAxes[0].ticks.max = fundchart.controller.scales.stackY.end;
 fundchart.update();
 
+function unpackFundPaidValTrend(hist, name) {
+    return filterMap(hist, d => {
+        return d.funds[name] ? { x: d.timestamp, y: d.funds[name].value - d.funds[name].share * d.summary.paid } : undefined;
+    });
+}
+
+let perfdatasets = getFunds(hist).map((name, i) => {
+    return charthelper.sensibleDataset(name, unpackFundPaidValTrend(hist, name), {
+        borderColor: colors[i],
+        backgroundColor: colors[i],
+        fill: false,
+    });
+});
+perfdatasets.push(charthelper.sensibleDataset('Overall', unpackPerfTrend(hist)));
+
 let perfchart = new Chart(document.getElementById('perfchart'), {
     type: 'line',
     data: {
-        datasets: [ charthelper.sensibleDataset('profit', unpackPerfTrend(hist)) ],
+        datasets: perfdatasets,
     },
     options: {
         scales: {
@@ -132,10 +149,25 @@ let perfchart = new Chart(document.getElementById('perfchart'), {
     },
 });
 
+function unpackFundPaidTrend(hist, name) {
+    return filterMap(hist, d => {
+        return d.funds[name] ? { x: d.timestamp, y: ((d.funds[name].value * 100) / (d.funds[name].share * d.summary.paid)) - 100 } : undefined;
+    });
+}
+
+let pcntdatasets = getFunds(hist).map((name, i) => {
+    return charthelper.sensibleDataset(name, unpackFundPaidTrend(hist, name), {
+        borderColor: colors[i],
+        backgroundColor: colors[i],
+        fill: false,
+    });
+});
+pcntdatasets.push(charthelper.sensibleDataset('Overall', unpackPcntTrend(hist)));
+
 let pcntchart = new Chart(document.getElementById('pcntchart'), {
     type: 'line',
     data: {
-        datasets: [ charthelper.sensibleDataset('profit', unpackPcntTrend(hist)) ],
+        datasets: pcntdatasets,
     },
     options: {
         scales: {
@@ -152,6 +184,9 @@ let pcntchart = new Chart(document.getElementById('pcntchart'), {
                 scaleLabel: {
                     display: true,
                     labelString: 'Net Gain (%)',
+                },
+                ticks: {
+                    suggestedMin: 0.0,
                 }
             }]
         }
