@@ -1,4 +1,5 @@
 const Chart = require('chart.js');
+const charthelper = require('./charthelper.js');
 
 var hist = require('../history.json');
 
@@ -46,16 +47,18 @@ function unpackPaidTrend(hist) {
 }
 
 datasets = getFunds(hist).map((name, i) => {
-    return { label: name, data: unpackFundTrend(hist, name), backgroundColor: colors[i], pointBorderColor: '#000000', yAxisID: 'stackY' };
+    return charthelper.sensibleDataset(name, unpackFundTrend(hist, name), {
+        backgroundColor: colors[i],
+        pointBorderColor: '#000000',
+        yAxisID: 'stackY',
+    });
 });
 // Datasets get z-indexed by the order in which they appear, i.e. earlier datasets are drawn over later ones
-datasets.unshift({
-    label: 'Paid In',
-    data: unpackPaidTrend(hist),
+datasets.unshift(charthelper.sensibleDataset('Paid In', unpackPaidTrend(hist), {
     yAxisID: 'overlayY',
     fill: false,
     borderColor: '#e53d3d',
-});
+}));
 
 let fundchart = new Chart(document.getElementById('fundchart'), {
     type: 'line',
@@ -106,10 +109,7 @@ fundchart.update();
 let perfchart = new Chart(document.getElementById('perfchart'), {
     type: 'line',
     data: {
-        datasets: [{
-            label: 'profit',
-            data: unpackPerfTrend(hist),
-        }],
+        datasets: [ charthelper.sensibleDataset('profit', unpackPerfTrend(hist)) ],
     },
     options: {
         scales: {
@@ -135,10 +135,7 @@ let perfchart = new Chart(document.getElementById('perfchart'), {
 let pcntchart = new Chart(document.getElementById('pcntchart'), {
     type: 'line',
     data: {
-        datasets: [{
-            label: 'profit',
-            data: unpackPcntTrend(hist),
-        }],
+        datasets: [ charthelper.sensibleDataset('profit', unpackPcntTrend(hist)) ],
     },
     options: {
         scales: {
