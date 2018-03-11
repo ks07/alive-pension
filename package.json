@@ -6,11 +6,15 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ks07/alive-pension.git"
+  },
+  "author": "George Field <gfield145@gmail.com> (https://github.com/ks07)",
   "license": "MIT",
   "dependencies": {
-    "browserify": "^16.1.0",
-    "chart.js": "^2.7.1",
+    "browserify": "^16.1.1",
+    "chart.js": "^2.7.2",
     "chartjs-plugin-zoom": "^0.6.3",
     "cli-table2": "^0.2.0",
     "puppeteer": "^1.1.1"
