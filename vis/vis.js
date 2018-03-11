@@ -1,5 +1,8 @@
 const Chart = require('chart.js');
+const ChartPluginZoom = require('chartjs-plugin-zoom');
 const charthelper = require('./charthelper.js');
+
+Chart.plugins.register(ChartPluginZoom);
 
 const hist = require('../history.json');
 
@@ -99,6 +102,14 @@ let fundchart = new Chart(document.getElementById('fundchart'), {
                     },
                 },
             ]
+        },
+        pan: {
+            enabled: true,
+            mode: 'x',
+        },
+        zoom: {
+            enabled: true,
+            mode: 'x',
         }
     },
 });
@@ -123,31 +134,7 @@ let perfdatasets = getFunds(hist).map((name, i) => {
 });
 perfdatasets.push(charthelper.sensibleDataset('Overall', unpackPerfTrend(hist)));
 
-let perfchart = new Chart(document.getElementById('perfchart'), {
-    type: 'line',
-    data: {
-        datasets: perfdatasets,
-    },
-    options: {
-        scales: {
-            xAxes: [{
-                type: 'time',
-                display: true,
-                scaleLabel: {
-                    display: true,
-                    labelString: 'Day',
-                }
-            }],
-            yAxes: [{
-                display: true,
-                scaleLabel: {
-                    display: true,
-                    labelString: 'Net Gain (£)',
-                }
-            }]
-        }
-    },
-});
+let perfchart = charthelper.timeSeriesGraph('perfchart', 'Net Gain (£)', perfdatasets);
 
 function unpackFundPaidTrend(hist, name) {
     return filterMap(hist, d => {
@@ -164,31 +151,4 @@ let pcntdatasets = getFunds(hist).map((name, i) => {
 });
 pcntdatasets.push(charthelper.sensibleDataset('Overall', unpackPcntTrend(hist)));
 
-let pcntchart = new Chart(document.getElementById('pcntchart'), {
-    type: 'line',
-    data: {
-        datasets: pcntdatasets,
-    },
-    options: {
-        scales: {
-            xAxes: [{
-                type: 'time',
-                display: true,
-                scaleLabel: {
-                    display: true,
-                    labelString: 'Day',
-                }
-            }],
-            yAxes: [{
-                display: true,
-                scaleLabel: {
-                    display: true,
-                    labelString: 'Net Gain (%)',
-                },
-                ticks: {
-                    suggestedMin: 0.0,
-                }
-            }]
-        }
-    },
-});
+let pcntchart = charthelper.timeSeriesGraph('pcntchart', 'Net Gain (%)', pcntdatasets);
