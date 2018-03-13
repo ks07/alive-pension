@@ -20,7 +20,13 @@ async function fetchFromSite(config) {
 
     let page = await browser.newPage();
 
-    await page.goto('https://www.direct.aviva.co.uk/MyAccount/login');
+    // Sometimes thirdparty resources (e.g. googleads) will cause page load to timeout
+    // We can workaround these situations by ignoring the timeout and instead checking if the form is present
+    try {
+        await page.goto('https://www.direct.aviva.co.uk/MyAccount/login', { waitUntil: 'networkidle2' });
+    } catch (err) {
+        console.warn('Site load timed out, may be recoverable...');
+    }
 
     await page.waitForSelector('#username', {visible: true, timeout: 5000});
 
@@ -37,11 +43,15 @@ async function fetchFromSite(config) {
 
     await page.waitForSelector('div.icon-pension div.completePolicyDetails', {visible: true, timeout: 15002});
 
-    let navWait = page.waitForNavigation();
+    let navWait = page.waitForNavigation({ waitUntil: 'networkidle2' });
 
     await page.click('div.icon-pension div.completePolicyDetails a[href*="ViewDetail"]');
 
-    await navWait;
+    try {
+        await navWait;
+    } catch (err) {
+        console.warn('Policy details timed out, may be recoverable...');
+    }
 
     console.log('Ready to fetch details');
 
