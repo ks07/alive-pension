@@ -35,13 +35,29 @@ async function fetchFromSite(config) {
 
     await page.click('#loginButton');
 
-    await page.waitForSelector('div.icon-pension', {visible: true, timeout: 15001});
+    // For some reason the site can sometimes hand while loading details with AJAX across these steps
+    // If something goes wrong, try refreshing the page
+    for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+            await page.waitForSelector('div.icon-pension', {visible: true, timeout: 15001});
 
-    await page.waitFor(2003);
+            await page.waitFor(2003);
 
-    await page.click('div.icon-pension');
+            await page.click('div.icon-pension');
 
-    await page.waitForSelector('div.icon-pension div.completePolicyDetails', {visible: true, timeout: 15002});
+            await page.waitForSelector('div.icon-pension div.completePolicyDetails', {visible: true, timeout: 15002});
+
+            break;
+        } catch (err) {
+            console.warn('Pension splash page load timed out, will retry.', err);
+
+            try {
+                await page.reload({ waitUntil: 'networkidle2' });
+            } catch (rErr) {
+                console.warn('Reload failed.', rErr);
+            }
+        }
+    }
 
     let navWait = page.waitForNavigation({ waitUntil: 'networkidle2' });
 
