@@ -38,6 +38,7 @@ async function fetchFromSite(config) {
     // For some reason the site can sometimes hand while loading details with AJAX across these steps
     // If something goes wrong, try refreshing the page
     for (let attempt = 0; attempt < 2; attempt++) {
+        console.log(`Starting attempt ${attempt}`);
         try {
             await page.waitForSelector('div.icon-pension', {visible: true, timeout: 15001});
 
@@ -71,6 +72,8 @@ async function fetchFromSite(config) {
 
     console.log('Ready to fetch details');
 
+    await page.waitForSelector('#featureTable tr.grossSummary', {visible: true, timeout: 15003});
+
     let summarytable = await page.$('#featureTable');
 
     let regPayment = await page.evaluate(table => table.querySelector('tr.grossSummary td').textContent, summarytable);
@@ -91,12 +94,10 @@ async function fetchFromSite(config) {
 
     // Grabs the fund breakdown
     let rawFundBreakdown = await page.$$eval('section.investmentOption article.fund', funds => {
-        console.log("toplevel");
         console.log(funds.length);
         return Array.from(funds).map(fund => {
             let fundName = fund.querySelector('h4.fundName a').textContent;
             return Array.from(fund.querySelectorAll('table.fundTable tr th')).map(fth => {
-                console.log("innermost");
                 console.log(fth.outerHTML);
                 return { fund: fundName, header: fth.textContent, value: fth.nextElementSibling.textContent };
             })
